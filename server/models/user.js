@@ -63,6 +63,29 @@ UserSchema.methods.generateAuthToken = function() {
   });
 };
 
+// use statics to create a model method, not a method for instance, kind of like prototype
+UserSchema.statics.findByToken = function(token) {
+  const User = this; // 'this' refers to the User model
+  let decoded;
+  
+  try {
+    decoded = jwt.verify(token, 'secret');
+  } catch(e) {
+    // return new Promise((resolve, reject) => {
+    //   reject();
+    // });
+    /////shorthand for reject()
+    return Promise.reject();
+    // this method returns a promise for server.js to chain more methods, so if auth fails, we return a Promise.reject() so server.js can use catch() to handle error.
+  }
+
+  return User.findOne({
+    _id: decoded._id,
+    'tokens.token': token, // quotes '' is required when the key is like tokens.token, _id alone is not required quotes
+    'tokens.access': 'auth'
+  });
+};
+
 const User = mongoose.model('User', UserSchema);
 
 module.exports = { User };
