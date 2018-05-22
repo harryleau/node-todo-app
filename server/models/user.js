@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 // cannot write methods on model, so we have to use schema
 const UserSchema = new mongoose.Schema({
@@ -85,6 +86,23 @@ UserSchema.statics.findByToken = function(token) {
     'tokens.access': 'auth'
   });
 };
+
+// pre() is a middleware method of mongoose => use next(), we use it to run something right before another method, in this case save()
+UserSchema.pre('save', function(next) {
+  const user = this;
+
+  // we don't want it to hash multiple times, like when user update something else. So we use a built-in method isModified() to check and only hash password if it's modified.
+  if(user.isModified('password')) {
+    bcrypt.genSalt(10, (err, salt) => {
+      bcrypt.hash(user.password, salt, (err, hash) => {
+        user.password = hash;
+        next();
+      });
+    });
+  } else {
+    next();
+  }
+});
 
 const User = mongoose.model('User', UserSchema);
 
