@@ -100,6 +100,20 @@ app.patch('/todos/:id', (req, res) => {
   
 });
 
+app.post('/users', (req, res) => {
+  const body = _.pick(req.body, ['email', 'password']);
+  const user = new User(body);
+
+  user.save().then(() => { // we don't need to add user arg as it's the same as the one above
+    return user.generateAuthToken(); // this method returns a promise => we can chain .then() after it.
+  })
+  // set header 'x-auth' to token
+  .then(token => {
+    res.header('x-auth', token).send(user); // when prefix a header => create a custom header
+  })
+  .catch(e => res.status(400).send(e));
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
