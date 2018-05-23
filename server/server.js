@@ -16,6 +16,7 @@ const port = process.env.PORT;
 // use bodyparser to parse json req to js obj  => can use req.body to get req object
 app.use(bodyParser.json());
 
+////// TODOS ROUTES
 app.post('/todos', (req, res) => {
   const todo = new Todo({
     text: req.body.text // can get req.body due to jsonparser
@@ -118,6 +119,20 @@ app.post('/users', (req, res) => {
 
 app.get('/users/me', authenticate, (req, res) => {
   res.send(req.user);
+});
+
+app.post('/users/login', (req, res) => {
+  const body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password)
+    .then(user => {
+      return user.generateAuthToken().then(token => {
+        res.header('x-auth', token).send(user);
+      });
+    })
+    .catch(e => {
+      res.status(400).send();
+    });
 });
 
 app.listen(port, () => {
