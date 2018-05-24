@@ -64,6 +64,18 @@ UserSchema.methods.generateAuthToken = function() {
   });
 };
 
+UserSchema.methods.removeToken = function(token) {
+  const user = this;
+
+  // return a promise to continue chanining methods.
+  return user.update({
+    // $pull operator is used to remove data.
+    $pull: {
+      tokens: { token }
+    }
+  })
+};
+
 // use statics to create a model method, not a method for instance, kind of like prototype
 UserSchema.statics.findByToken = function(token) {
   const User = this; // 'this' refers to the User model
