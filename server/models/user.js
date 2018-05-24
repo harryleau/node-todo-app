@@ -51,7 +51,7 @@ UserSchema.methods.generateAuthToken = function() {
   const user = this;
   const access = 'auth';
   // first arg is data object (_id and access), second is the salt. this method return an obj so we use toString()
-  const token = jwt.sign({_id: user._id.toHexString(), access}, 'secret').toString();
+  const token = jwt.sign({_id: user._id.toHexString(), access}, process.env.JWT_SECRET).toString();
 
   user.tokens.push({ access, token });
   // if push() not work due to mongodb version conflict, use concat()
@@ -82,7 +82,7 @@ UserSchema.statics.findByToken = function(token) {
   let decoded;
   
   try {
-    decoded = jwt.verify(token, 'secret');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch(e) {
     // return new Promise((resolve, reject) => {
     //   reject();
