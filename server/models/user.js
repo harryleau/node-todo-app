@@ -69,7 +69,7 @@ UserSchema.methods.removeToken = function(token) {
 
   // return a promise to continue chanining methods.
   return user.update({
-    // $pull operator is used to remove data.
+    // $pull operator is used to remove property in a document (remove token from tokens property in user)
     $pull: {
       tokens: { token }
     }
